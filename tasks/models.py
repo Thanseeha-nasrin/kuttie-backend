@@ -1,17 +1,19 @@
 from django.db import models
+from django.contrib.auth.models import User
 
-class Submission(models.Model):
-    TASK_CHOICES = [
-        (1, "Letter to a Character"),
-        (2, "Paint an old T-shirt"),
-        (3, "Bottle art"),
-        (4, "Mud Sculpting"),
-    ]
-
-    task_id = models.IntegerField(choices=TASK_CHOICES)
-    user = models.CharField(max_length=50)
-    submission = models.TextField(blank=True)  # text or image URL
-    timestamp = models.DateTimeField(auto_now_add=True)
+class Task(models.Model):
+    name = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.user} - Task {self.task_id}"
+        return self.name
+
+class Submission(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='submissions')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
+    submission_file = models.CharField(max_length=255, default='default.png')  # You can use FileField later if storing files
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.task.name}"
+
+# Optional: Leaderboard can be calculated dynamically from Submissions
